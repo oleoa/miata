@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Paleta tirada das proprias fotos: o verde escuro da carrocaria, o creme dos
+   mostradores e o ouro dos faroleiros. Sem tema claro alternativo, a pagina tem
+   uma so aparencia. */
+@theme {
+  --color-fundo: #14231c;
+  --color-creme: #ede8dd;
+  --color-corpo: #c6c0b4;
+  --color-rotulo: #94a099;
+  --color-linha: #33433a;
+  --color-ouro: #c9a46a;
+
+  --font-display: var(--fonte-display), Georgia, "Times New Roman", serif;
+  --font-serif: var(--fonte-corpo), Georgia, serif;
+  --font-mono: var(--fonte-mono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-fundo);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* O grao e um SVG de turbulencia misturado por `screen` com o verde do fundo.
+   Fica no `body` para correr por baixo de tudo, inclusive das fotos com alfa. */
+body {
+  background-color: var(--color-fundo);
+  background-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+  color: var(--color-creme);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Revelacao ao entrar no viewport. A classe `.visivel` e posta por JS; sem JS,
+   ou com movimento reduzido, fica tudo visivel na mesma. */
+.revelar {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.revelar.visivel {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .revelar,
+  .revelar.visivel {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Galeria justificada.
+   A leitura e por linhas: as tres primeiras fotos na primeira linha, as tres
+   seguintes na segunda, e assim por diante. Cada linha enche a largura toda e
+   todas as fotos dela ficam com a mesma altura, sem cortes.
+
+   O truque e ter o `flex-basis` e o `flex-grow` ambos proporcionais ao formato
+   da foto (largura a dividir pela altura, em `--formato`): o espaco que sobra
+   distribui-se na mesma proporcao, portanto as larguras finais continuam
+   proporcionais aos formatos e as alturas saem todas iguais.
+
+   A `--altura-base` e o que decide quantas fotos cabem por linha. Em vw acima
+   dos 640px, para que o numero por linha nao mude com o tamanho da janela. */
+.galeria {
+  --altura-base: 22rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+@media (min-width: 640px) {
+  .galeria {
+    --altura-base: 33vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .galeria {
+    --altura-base: min(21.5vw, 260px);
+  }
+}
+
+.galeria > * {
+  flex-grow: var(--formato);
+  flex-basis: calc(var(--formato) * var(--altura-base));
+  /* Trava a ultima linha: sozinha, uma foto esticaria a largura toda e ficaria
+     enorme ao pe das outras. As linhas cheias crescem bem menos do que isto,
+     portanto o limite so se faz sentir onde e preciso. */
+  max-width: calc(var(--formato) * var(--altura-base) * 1.5);
+  /* Sem isto o `min-width: auto` usa a largura real da foto e nada encolhe. */
+  min-width: 0;
+}
+
+/* Lightbox */
+dialog.lightbox {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: 100vw;
+  height: 100dvh;
+  padding: 0;
+  border: 0;
+  background: rgb(10 18 14 / 0.97);
+  color: var(--color-creme);
+  overflow: hidden;
+}
+
+dialog.lightbox::backdrop {
+  background: rgb(10 18 14 / 0.97);
 }

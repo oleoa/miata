@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MX-5
 
-## Getting Started
+Página do Mazda MX-5 NA de 1994 à venda. Um link só, para mandar a quem já está
+em contacto. Não é um anúncio público: leva `noindex` e não tem contacto nenhum
+no site.
 
-First, run the development server:
+## Correr
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Fotos
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Os originais estão em `_originais/` e **não** vão para o git (~50 MB). Os ficheiros
+que a página usa são os WebP em `fotos/`, gerados por:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run fotos
+```
 
-## Learn More
+O script (`scripts/processar-fotos.mjs`) faz três coisas que interessam:
 
-To learn more about Next.js, take a look at the following resources:
+1. Aplica a orientação EXIF e limpa a tag. Quatro dos originais estavam guardados
+   torcidos e sem isto apareciam deitados em parte dos browsers.
+2. Reduz para 2400 px no lado maior. O `next/image` gera daí o srcset.
+3. Deita fora a metadata, incluindo o GPS das fotos tiradas com telemóvel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Para trocar, acrescentar ou reordenar fotos: mexer no `MAPA` do script, correr
+`npm run fotos`, e acertar `lib/fotos.ts`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Onde mudar o quê
 
-## Deploy on Vercel
+| Quero mudar | Ficheiro |
+| --- | --- |
+| Preço, quilómetros, ficha técnica, textos | `lib/carro.ts` |
+| Legendas, ordem e grupos da galeria | `lib/fotos.ts` |
+| Cores e tipografia | `app/globals.css` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vercel. `vercel` para preview, `vercel --prod` para produção.
